@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Pixel Borders</title>
+    <meta name="description" content="Add pixelated borders to HTML elements and customize with different sizes, colours and styles.">
+
+    <meta property="og:title" content="Pixel Borders"> 
+    <meta property="og:description" content="Add pixelated borders to HTML elements and customize with different sizes, colours and styles.">
+    <meta property="og:site_name" content="Pixel Borders">
+    <meta property="og:url" content="https://nigelotoole.github.io/pixel-borders/">
+    <meta property="og:image" content="https://nigelotoole.github.io/pixel-borders/images/pixel-borders-social.png"> 
+    <meta property="og:image:alt" content="Pixel Borders">
+    <meta name="twitter:card" content="summary_large_image">
+  
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/pixel-borders.css">
+  </head>
+
+
+  <body>
+
+    <header class="header fullwidth space--sm">
+      <div class="container">
+        <h1 class="logo-text">Pixel Borders</h1> 
+
+        <nav class="nav header-nav">
+          <a href="https://github.com/nigelotoole/pixel-borders/archive/master.zip" class="btn btn--green btn--ghost"><span>Download</span></a>
+          <a href="https://github.com/nigelotoole/pixel-borders" target="_blank" rel="noopener" class="btn btn--green btn--ghost"><span>GitHub <svg class="icon" viewbox="0 0 24 24"><path d="M7 7h8.586L5.293 17.293l1.414 1.414L17 8.414V17h2V5H7v2z"/></svg></span> 
+            </a>
+        </nav>
+      </div>
+    </header>
+
+
+    <main id="main" class="main">
+      <section class="fullwidth intro">
+        <div class="container content flow">
+          
+          <div class="heading page-intro">
+            <h2 class="page-heading">Add pixelated borders to HTML elements and customize with different sizes, colours and styles.</h2>
+
+            <img src="images/pixel-borders-logo.svg" class="page-intro-img" width="80" height="80" alt="Pixel Borders logo">
+          </div>
+
+          <h3>Features</h3> 
+          <ul class="columns-sm-2">
+            <li>SASS, PostCSS and CSS</li>
+            <li>Four sizes</li>
+            <li>Colour themes</li>
+            <li>Highlight and shadow</li>
+          </ul>
+
+        </div>
+      </section>
+
+
+      <section class="fullwidth demos">
+        <div class="container content flow">
+
+          <h2>Examples</h2>
+          <h3>Sizes</h3>
+
+          <section class="demo">
+            <div class="group group--min">
+              <button class="pixel-borders pixel-borders--1">Press start 1p</button>
+              <button class="pixel-borders pixel-borders--2">Press start 2p</button>    
+              <button class="pixel-borders pixel-borders--3">Press start 3p</button>
+              <button class="pixel-borders pixel-borders--4">Press start 4p</button>
+            </div>    
+          </section>
+
+
+          <h3>Colours</h3>
+
+          <section class="demo">
+            <div class="group group--min">
+              <button class="pixel-borders pixel-border-theme--primary">Pixel primary</button>
+              <button class="pixel-borders pixel-border-theme--success">Pixel success</button>
+              <button class="pixel-borders pixel-border-theme--warning">Pixel warning</button>
+              <button class="pixel-borders pixel-border-theme--error">Pixel error</button>
+            </div>
+          </section>
+
+
+          <h3>Highlight &amp; Shadow</h3>
+
+          <section class="demo"> 
+            <div class="group group--min">
+              <button class="pixel-borders pixel-borders--inset pixel-borders--inset-hightlight pixel-border-theme--primary">Highlight</button>      
+              <button class="pixel-borders pixel-borders--inset pixel-borders--inset-shadow pixel-border-theme--primary">Shadow</button>      
+              <button class="pixel-borders pixel-borders--inset pixel-borders--inset-all pixel-border-theme--primary">Highlight &amp; Shadow</button>
+            </div>
+          </section>
+
+        </div>
+      </section>
+
+
+      <section class="fullwidth docs">
+        <div class="container content flow">
+
+            <h2>Installation</h2>
+
+<pre><code class="overflow-inline" tabindex="0">$ npm install pixel-borders --save-dev</code></pre>
+
+            <p>Import the files into your project and add the elements to your markup.</p>
+
+            <h3>SASS</h3>
+
+            <p>The default version and used to generate the compiled CSS.</p>
+
+<pre><code class="overflow-inline" tabindex="0">node_modules/pixel-borders/src/styles/pixel-borders/css/styles.css
+node_modules/pixel-borders/src/styles/pixel-borders/sass/pixel-borders.css
+</code></pre>
+
+            <h3>PostCSS</h3>
+
+            <p>Slightly different syntax to the SASS version and requires postcss-advanced-variables to work.</p>
+
+<pre><code class="overflow-inline" tabindex="0">node_modules/pixel-borders/src/styles/pixel-borders/css/styles.css
+node_modules/pixel-borders/src/styles/pixel-borders/postcss/pixel-borders.css
+</code></pre>
+
+            <h3>Compiled CSS</h3>
+
+            <p>Pixel borders is mainly controlled using CSS variables however you will need to manually change the SVG fill colour for a custom border colour.</p>
+
+<pre><code class="overflow-inline" tabindex="0">node_modules/pixel-borders/src/styles/pixel-borders.css
+</code></pre>
+
+
+          <h3>Markup</h3>
+
+          <pre><code class="overflow-inline" tabindex="0">&lt;button class="pixel-border pixel-borders--1"&gt;Press start 1p&lt;/button&gt;
+</code></pre>
+
+          <h2>Compatibility</h2>
+          <p>Supports all modern browsers at the time of release.</p>
+
+
+          <h2>Demo site</h2>
+          <p>Clone the repo from Github and run the commands below.</p>
+
+          <pre><code class="overflow-inline" tabindex="0">$ npm install
+$ npm run dev
+</code></pre>
+
+          <h3>References</h3>
+          <p>Inspired by <a href="https://nostalgic-css.github.io/NES.css/">NES.css</a> and <a href="https://pixelcorners.lukeb.co.uk">Pixel corners.</a></p>
+
+        </div>
+      </section>
+    </main>
+
+
+    <footer class="fullwidth space--sm footer">
+      <div class="container content">
+        <div class="group share">
+          <h4 class="share-title">Share this</h4>
+
+          <button class="btn btn--icon-multi share-url" data-share-text-selector="span" data-share-maintain-size="true">
+            <span>Share link</span> 
+            <svg class="icon" aria-hidden="true" viewbox="0 0 24 24"><path d="m3.293 11.293 1.414 1.414L11 6.414V20h2V6.414l6.293 6.293 1.414-1.414L12 2.586l-8.707 8.707z"/></svg>
+            <svg class="icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="square" stroke-linejoin="arcs"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" fill="none" /><path d="M22 4 12 14.01l-3-3" fill="none"/></svg>
+          </button>
+          
+          <button class="btn btn--icon-multi share-url" data-share-text-selector="span" data-share-maintain-size="true" data-share-action="clipboard" data-share-text-success="Copied">
+            <span>Copy link</span> 
+            <svg class="icon" aria-hidden="true" viewbox="0 0 24 24"><rect x="8" y="3" width="13" height="13" rx="0" stroke-width="2" stroke-linecap="square" stroke-linejoin="arcs" fill="none"></rect><path d="M4 7v12c0 .6.4 1 1 1h12" stroke-width="2" stroke-linecap="square" stroke-linejoin="arcs" fill="none"></path></svg>
+            
+            <svg class="icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="square" stroke-linejoin="arcs"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" fill="none" /><path d="M22 4 12 14.01l-3-3" fill="none"/></svg>
+          </button>
+    </div>
+
+        <nav class="nav footer-nav">
+          <a href="http://www.purestructure.com/nigelotoole" rel="author">Made by Nigel O Toole</a>
+          <a href="https://github.com/nigelotoole" rel="external">GitHub</a>
+          <a data-encode="bWFpbHRvOnB1cmVAcHVyZXN0cnVjdHVyZS5jb20" data-encode-attribute="href" class="encode">Email</a>
+          <a href="http://www.purestructure.com" rel="external" class="w-100">PURE STRUCTURE</a>
+        </nav>
+      </div>
+    </footer>
+
+
+    <script src="scripts/main.js" type="module"></script>
+
+  </body>
+</html>

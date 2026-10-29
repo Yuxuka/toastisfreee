@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang='zh-Hant'>
+<head>
+<meta name='robots' content='noindex, nofollow'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<meta charset='UTF-8'>
+<link rel='preconnect' href='https://fonts.googleapis.com'>
+<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Huninn&display=swap'>
+<link rel='stylesheet' 
+href='https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'>
+<link rel='stylesheet' href='./pixel-borders.css'>
+
+<title>烙跑倒數💃🏻</title>
+
+<style>
+:root {
+    --week-gap: 60px;
+    --days-offset: -3px;
+    --track-offset: -20px;
+    --track-height: 18px;    
+    --walker-top: calc(-4px - var(--walker-size));
+
+    --hammock-width: 36px;
+    --hammock-height: 72px;
+    --hammock-top: -60px;
+
+    --sleep-width: 36px;
+    --sleep-height: 72px;
+    --sleep-top: -60px;
+
+    --marker-top: -50px;
+
+    --stair-top: 40px;
+    --stair-width: 60px;
+    --stair-height: 70px;
+}
+
+body {
+    margin: 30px;
+    background: #fffdf9;
+    font-family: 'Huninn',sans-serif;
+}
+
+#zoomOverlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255,255,255,.4);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+}
+
+#zoomOverlay.show {
+    display: flex;
+}
+
+#zoomContent {
+    position: relative;
+}
+
+.zoom-scene {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    background: rgba(255,253,249,.9);
+}
+
+.zoom-character {
+    position: absolute;
+    image-rendering: pixelated;
+    max-width: none;
+    max-height: none;
+}
+
+.zoom-track {
+    position: absolute;
+    transform-origin: top left;
+}
+
+#countdownBox {
+    position: sticky;
+    top: 20px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(18px, 5vw, 30px);
+    width: fit-content;
+    max-width: calc(100vw - 60px);
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 70px;
+    padding: 18px;
+    background: #fff0f3;
+    text-align: center;
+    font-weight: bold;
+    color: #8f5d5d;
+}
+
+.countdown-main {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3em;
+}
+
+.countdown-sub {
+    margin-top: 6px;
+    font-size: 0.45em;
+    font-weight: normal;
+    color: #a98282;
+}
+
+.normal-text {
+    font-family: 'Huninn', sans-serif;
+}
+
+.sparkles {
+    height: 1.3em;
+    vertical-align: middle;
+}
+
+.pleading {
+    height: 1.5em;
+    vertical-align: middle;
+}
+
+#dayNumber {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(16px,5vw,28px);
+}
+
+.week {
+    position: relative;
+    display: flex;
+    width: fit-content;
+    margin-bottom: var(--week-gap);
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
+}
+
+.days {
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    top: var(--days-offset);
+}
+
+.days.reverse {
+    flex-direction: row-reverse;
+}
+
+.zzz {
+    position: relative;
+    height: clamp(36px,10vw,50px);
+    aspect-ratio: 2.2;
+    display: flex;
+    font-size: clamp(10px,4vw,15px);
+    color: #694b4b;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid rgba(255,255,255,.8);
+    border-radius: 12px;
+    box-shadow:
+        0 4px 0 rgba(0,0,0,.08),
+        inset 0 2px 0 rgba(255,255,255,.9);
+    transition: border-color .3s, box-shadow .3s;
+}
+
+.zzz.glowing {
+    border: 3px solid #ffd34d;
+    box-shadow:
+        0 4px 0 rgba(0,0,0,.08),
+        inset 0 2px 0 rgba(255,255,255,.9),
+        0 0 12px rgba(255,211,77,.8),
+        0 0 24px rgba(255,211,77,.4);
+}
+
+.day {
+    z-index: 1;
+    width: clamp(36px,10vw,50px);
+    aspect-ratio: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(14px,5vw,20px);
+    font-weight: bold;
+    color: #694b4b;
+    border-radius: 12px;
+    border: 3px solid rgba(255,255,255,.8);
+    box-shadow:
+        0 4px 0 rgba(0,0,0,.08), 
+        inset 0 2px 0 rgba(255,255,255,.9);
+    transition: .3s;
+}
+
+.day.past {
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+.day.past::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,.6);
+    border-radius: 12px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.day.today {
+    border: 3px solid #ffd34d;
+    box-shadow:
+        0 4px 0 rgba(0,0,0,.08),
+        inset 0 2px 0 rgba(255,255,255,.9),
+        0 0 12px rgba(255,211,77,.8),
+        0 0 24px rgba(255,211,77,.4);
+}
+
+.day.freedom {
+    border: 3px solid #ff74b2;
+}
+
+.month-marker {
+    z-index: 5;
+    position: absolute;
+    white-space: nowrap;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(11px, 3vw, 15px);
+    color: #7b6f6f;
+    text-align: center;
+    top: var(--marker-top);
+    opacity: 1;
+    transition: opacity .3s;
+    pointer-events: none;
+}
+
+@keyframes bounce {
+    0% {transform: translateY(1px);}
+    50% {transform: translateY(5px);}
+    100% {transform: translateY(1px);}
+}
+
+.month-marker .arrow {
+    font-size: clamp(14px,4vw,18px);
+    animation: bounce 1s infinite ease-in-out;
+}
+
+.month-marker.past-month {
+    opacity: .3;
+}
+
+.track {
+    z-index: 10;
+    image-rendering: pixelated;
+    position: absolute;
+    left: 0;
+    top: var(--track-offset);
+    height: var(--track-height);
+    border-radius: 5px;
+    overflow: hidden;
+    background: transparent;
+}
+
+.track-completed {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background-image: url(completed.png);
+    background-repeat :repeat-x;
+    background-size: auto 100%;
+}
+
+.track-current {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 72px;
+    height: 100%;
+    display: none;
+    background-image: url(current.png);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+.walker {
+    z-index: 40;
+    image-rendering: pixelated;
+    position: absolute;
+    width: auto;
+    height: auto;
+    top: var(--walker-top);
+    transition: .3s;
+}
+
+.walker.hidden {
+    display: none;
+}
+
+.flag {
+    z-index: 30;
+    image-rendering: pixelated;
+    position: absolute;
+    top: -25px;
+    right: 20px;
+    width: 24px;
+    height: 24px;
+}
+
+.hammock {
+    z-i ndex: 30;
+    image-rendering: pixelated;
+    position: absolute;
+    width: var(--hammock-width);
+    height: var(--hammock-height);
+    top: var(--hammock-top);
+}
+
+.sleep {    
+    z-index: 30;
+    image-rendering: pixelated;
+    position: absolute;
+    width: var(--sleep-width);
+    height: var(--sleep-height);
+    top: var(--sleep-top);
+}
+
+.stair {
+    z-index: 22;
+    image-rendering: pixelated;
+    position: absolute;
+    width: var(--stair-width);
+    height: var(--stair-height);
+    top: var(--stair-top);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    pointer-events: none;
+}
+
+.stair.past-week {
+    opacity: 0.4;
+}
+
+</style>
+</head>
+<body>
+
+<div id = 'zoomOverlay'>
+    <div id = 'zoomContent'></div>
+</div>
+
+<div id = 'countdownBox' class = 'pixel-borders pixel-borders--3a pixel-borders--inset pixel-borders--inset-all'>
+    <div class = 'countdown-main'>
+        <span class = 'normal-text'>烙跑倒數</span>
+        <span id = 'dayNumber'>dayNumber</span>
+        <span class = 'normal-text'>天</span>
+        <img class = 'sparkles' src = 'sparkles.png'>
+    </div>
+    <div id = 'countdownSub' class = 'countdown-sub normal-text'></div>
+</div>
+
+<div id = 'calendar'></div>
+
+<script>
+
+// ==================== Config ====================
+
+const START_DATE = '2026-06-29';
+const END_DATE = '2026-09-06';
+const LAST_WORKDAY = '2026-09-04';
+
+const WEEK_COLORS = ['#ffbfd9','#ffe79a','#bff0b7','#bfeeff','#d8bdff'];
+
+const ENABLE_WALKER = true;
+const WALK_GIF_SMALL = 'walk_36px.gif';
+const WALK_GIF_LARGE = 'walk_48px.gif';
+
+const TRACK_IMAGE = '';
+const HAMMOCK_GIF = 'hammock.gif';
+const SLEEP_GIF = 'hammock.gif';
+const STAIR_IMAGE = 'stair.png';
+
+const TRACK_CURRENT_WIDTH = 72;
+const TRACK_CURRENT_HALF = TRACK_CURRENT_WIDTH / 2;
+const MOBILE_BREAKPOINT = 480;
+
+const AFTER_MODE = {
+    enabled: true,
+    text: '躺躺..zZ',
+    mergeDays: 2,
+    trackFull: true,
+    animate: true,
+    walk: {
+        small: {
+            src: WALK_GIF_SMALL,
+            width: 36,
+            height: 36
+        },
+        large: {
+            src: WALK_GIF_LARGE,
+            width: 48,
+            height: 48
+        },
+        minSc: 1000,
+        maxSc: 8000,
+        speed: 0.2
+    },
+    sleep: {
+        src: SLEEP_GIF,
+        width: 36,
+        height: 72,
+        minSc: 3000,
+        maxSc: 5000,
+    },
+};
+
+
+// ==================== Time, Date ====================
+
+const TAIPEI_OFFSET_MS = 8 * 60 * 60 * 1000;
+
+function parseTaipeiDate(dateStr){
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(Date.UTC(year, month - 1, day));
+}
+
+function getTaipeiDate(date){
+    return date;
+}
+
+function formatDate(d){
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth()+1).padStart(2,'0');
+    const day = String(d.getUTCDate()).padStart(2,'0');
+
+    return `${y}-${m}-${day}`;
+}
+
+function getRemainingWorkdays(startDate, endDate){
+    let count = 0;
+    const checkDate = new Date(startDate.getTime());
+    const end = new Date(endDate.getTime());
+
+    while(checkDate <= end){
+        const day = checkDate.getUTCDay();
+        if(day >= 1 && day <= 5){
+            count++;
+        }
+        checkDate.setUTCDate(checkDate.getUTCDate()+1);
+    }
+
+    return count;
+}
+
+// ==================== Calendar ====================
+
+const startDate = parseTaipeiDate(START_DATE);
+const endDate = parseTaipeiDate(END_DATE);
+
+const dates = [];
+let currentDate = new Date(startDate);
+
+const weeks = [];
+let currentWeek = [];
+
+const nowTaipei = new Date(Date.now() + TAIPEI_OFFSET_MS);
+const actualToday = new Date(Date.UTC(
+    nowTaipei.getUTCFullYear(),
+    nowTaipei.getUTCMonth(),
+    nowTaipei.getUTCDate()
+));
+
+const afterDates = [];
+const lastWorkdayDate = parseTaipeiDate(LAST_WORKDAY);
+const isFinished = actualToday > lastWorkdayDate;
+const dayAfterLastWorkday = new Date(lastWorkdayDate);
+dayAfterLastWorkday.setUTCDate(dayAfterLastWorkday.getUTCDate() + 1);
+
+const today = actualToday < startDate
+    ? new Date(startDate)
+    : isFinished
+        ? dayAfterLastWorkday
+        : actualToday;
+const todayStr = formatDate(today);
+
+const remainingWorkdays = isFinished
+    ? 0
+    : getRemainingWorkdays(today, lastWorkdayDate);
+
+// ==================== Calendar (Setup) ====================
+
+for(let i = 0; i < AFTER_MODE.mergeDays; i++){
+    const d = new Date(endDate);
+    d.setUTCDate(d.getUTCDate()-i);
+    afterDates.unshift(formatDate(d));
+}
+
+while(currentDate <= endDate){
+    dates.push(new Date(currentDate));
+    currentDate.setUTCDate(currentDate.getUTCDate()+1);
+}
+
+dates.forEach(date => {
+    currentWeek.push(date);
+    const taipei = getTaipeiDate(date);
+    if(taipei.getUTCDay() === 0){
+        weeks.push(currentWeek);
+        currentWeek = [];
+    }
+});
+
+if(currentWeek.length){
+    weeks.push(currentWeek);
+}
+
+document.getElementById('dayNumber').textContent = remainingWorkdays;
+
+// ==================== Calendar (Countdown Box Sub) ====================
+
+const countdownSub = document.getElementById('countdownSub');
+
+if(remainingWorkdays <= 0){
+    countdownSub.innerHTML = `（已經自由嚕～～<img class='pleading' src='pleading-face.webp'><img class = 'sparkles' src='sparkles.png'>）`;
+}else{
+    countdownSub.innerHTML = `（還有 ${remainingWorkdays} 天！<img class='pleading' src='pleading-face.webp'>）`;
+}
+
+// ==================== Calendar (Week) ====================
+
+let currentWeekIndex = -1;
+
+function updateTrackWidth(track, row){
+    track.style.width = row.offsetWidth + 'px';
+    track.style.left = row.offsetLeft + 'px';
+}
+
+const calendar = document.getElementById('calendar');
+
+weeks.forEach((week, weekIndex) => {
+    const weekColor = WEEK_COLORS[weekIndex % WEEK_COLORS.length];
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'week';
+
+    const track = document.createElement('div');
+    track.className = 'track';
+
+    const trackCompleted = document.createElement('div');
+    trackCompleted.className = 'track-completed';
+
+    const trackCurrent = document.createElement('div');
+    trackCurrent.className = 'track-current';
+
+    track.appendChild(trackCompleted);
+    track.appendChild(trackCurrent);
+
+    if(TRACK_IMAGE){
+        track.style.background = `url(${TRACK_IMAGE}) center/cover`;
+    }
+
+    const walker = document.createElement('img');
+    walker.className = 'walker';
+
+    walker.addEventListener('click', () => {
+        zoomChar(walker);
+    });
+
+    const { size: walkerSize, src: walkerSrc } = getWalkerConfig();
+    walker.src = walkerSrc;
+    walker.width = walkerSize;
+    walker.height = walkerSize;
+
+    const sleep = document.createElement('img');
+    sleep.addEventListener('click', () => {
+        zoomChar(sleep);
+    });
+    sleep.className = 'sleep';
+    sleep.style.display = 'none';
+
+    if(!ENABLE_WALKER){
+        walker.classList.add('hidden');
+    }
+
+    wrapper.appendChild(walker);
+    wrapper.appendChild(sleep);
+    wrapper.appendChild(track);
+
+    const row = document.createElement('div');
+    row.className = 'days';
+    if(weekIndex % 2 === 1){
+        row.classList.add('reverse');
+    }
+
+    week.forEach((date,index) => {
+        const taipei = getTaipeiDate(date);
+        const dateStr = formatDate(date);
+        const day = document.createElement('div');
+        day.className = 'day';
+        day.style.background = weekColor;
+        day.textContent = taipei.getUTCDate();
+
+        if(dateStr === afterDates[0]){
+            const sleepZone = document.createElement('div');
+            sleepZone.className = 'zzz';
+            if(isFinished){
+                sleepZone.classList.add('glowing');
+            }
+            sleepZone.textContent = AFTER_MODE.text;
+            sleepZone.style.background = weekColor;
+            sleepZone.dataset.date = dateStr;
+
+            if(afterDates.includes(todayStr)){
+                currentWeekIndex = weekIndex;
+            }
+
+            row.appendChild(sleepZone);
+            return;
+        }
+
+        if(afterDates.includes(dateStr) && dateStr !== afterDates[0]){
+            return;
+        }
+
+        if(taipei.getUTCDate() === 1 || dateStr === START_DATE){
+            const marker = document.createElement('div');
+            marker.className = 'month-marker';
+            marker.innerHTML = `
+                <div>${taipei.getUTCMonth()+1}月</div>
+                <div class='arrow'>▼</div>
+            `;
+
+            const markerMonth = taipei.getUTCMonth();
+            const currentMonth = today.getUTCMonth();
+            
+            if(markerMonth < currentMonth){
+                marker.classList.add('past-month');
+            }
+
+            day.appendChild(marker);
+        }
+
+        if(dateStr < todayStr){
+            day.classList.add('past');
+        }
+
+        day.dataset.weekIndex = weekIndex;
+        day.dataset.dayIndex = index;
+        day.dataset.date = dateStr;
+
+        if(dateStr === todayStr){
+            day.classList.add('today');
+            currentWeekIndex = weekIndex;
+        }
+
+        if(dateStr === LAST_WORKDAY){
+            day.classList.add('freedom');
+            const flag = document.createElement('img');
+            flag.className = 'flag';
+            flag.src = 'flag.png';
+            day.appendChild(flag);
+        }
+
+        row.appendChild(day);
+        if(index < week.length - 1){
+            const gap = document.createElement('div');
+            if(taipei.getUTCDay() === 5){
+                gap.style.width = '20px';
+            }
+            else{
+                gap.style.width = '5px';
+            }
+
+            row.appendChild(gap);
+        }
+    });
+
+    wrapper.appendChild(row);
+
+    if(STAIR_IMAGE && weekIndex < weeks.length - 1){
+        const stair = document.createElement('div');
+        stair.className = 'stair';
+        stair.style.backgroundImage = `url(${STAIR_IMAGE})`;
+        const isReverseWeek = weekIndex % 2 === 1;
+        const offset = '20px';
+        if(isReverseWeek) {
+            stair.style.left = offset;
+            stair.style.transform = 'scaleX(-1)';
+        }else{
+            stair.style.right = offset;
+        }
+        wrapper.appendChild(stair);
+    }
+    
+    calendar.appendChild(wrapper);
+
+    requestAnimationFrame(() => {
+        updateTrackWidth(track, row);
+    });
+});
+
+// ==================== Track ====================
+
+function setTrackCurrentSpan(trackCompleted, trackCurrent, anchorLeft, width, rowWidth, isReverse){
+    const clampedLeft = Math.max(0, Math.min(rowWidth - width, anchorLeft));
+    const anchorRight = clampedLeft + width;
+
+    trackCurrent.style.width = width + 'px';
+
+    if(!isReverse){
+        trackCompleted.style.left = '0px';
+        trackCompleted.style.right = 'auto';
+        trackCompleted.style.width = clampedLeft + 'px';
+
+        trackCurrent.style.left = clampedLeft + 'px';
+        trackCurrent.style.right = 'auto';
+    }else{
+        trackCompleted.style.left = 'auto';
+        trackCompleted.style.right = '0px';
+        trackCompleted.style.width = Math.max(0, rowWidth - anchorRight) + 'px';
+
+        trackCurrent.style.left = 'auto';
+        trackCurrent.style.right = Math.max(0, rowWidth - anchorRight) + 'px';
+    }
+}
+
+// ==================== Character ====================
+
+function getCharacterMode(){
+    const day = nowTaipei.getUTCDay();
+    const hour = nowTaipei.getUTCHours();
+
+    const isRestWindow =
+        (day === 5 && hour >= 18) ||
+        day === 6 ||
+        day === 0 ||
+        (day === 1 && hour < 8);
+
+    return isRestWindow ? 'resting' : 'walking';
+}
+
+function getWalkerConfig(){
+    return window.innerWidth < MOBILE_BREAKPOINT
+        ? { size: 48, src: WALK_GIF_LARGE }
+        : { size: 48, src: WALK_GIF_LARGE };
+}
+
+function applyWalkerSize(){
+    const { size, src } = getWalkerConfig();
+    document.documentElement.style.setProperty('--walker-size', `${size}px`);
+
+    document.querySelectorAll('.walker').forEach(walker => {
+        walker.width = size;
+        walker.height = size;
+        if(walker.getAttribute('src') !== src){
+            walker.src = src;
+        }
+    });
+}
+
+applyWalkerSize();
+
+// ==================== Render ====================
+
+function renderAllTracks(){
+    const allWeeks = document.querySelectorAll('.week');
+    const isFinished = actualToday > lastWorkdayDate;
+
+    allWeeks.forEach((weekEl, index) => {
+        const stair = weekEl.querySelector('.stair');
+        if(stair){
+            stair.classList.toggle('past-week', index < currentWeekIndex - 1);
+        }
+
+        const row = weekEl.querySelector('.days');
+        const track = weekEl.querySelector('.track');
+
+        track.style.display = '';
+        updateTrackWidth(track, row);
+
+        const trackCompleted = weekEl.querySelector('.track-completed');
+        const trackCurrent = weekEl.querySelector('.track-current');
+
+        if(isFinished && AFTER_MODE.enabled && AFTER_MODE.trackFull){
+            trackCompleted.style.left = '0';
+            trackCompleted.style.right = 'auto';
+            trackCompleted.style.width = '100%';
+            trackCurrent.style.display = 'none';
+            return;
+        }
+
+        if(index < currentWeekIndex){
+            trackCompleted.style.left = '0';
+            trackCompleted.style.right = 'auto';
+            trackCompleted.style.width = '100%';
+            trackCurrent.style.display = 'none';
+        }else if(index > currentWeekIndex){
+            track.style.display = 'none';
+        }
+    });
+    document.querySelectorAll('.hammock').forEach(el => el.remove());
+
+    if(currentWeekIndex < 0){
+        currentWeekIndex = weeks.length - 1; // if cant find today week then show last week
+    }
+
+    const week = allWeeks[currentWeekIndex];
+    if(!week){
+        console.warn('renderAllTracks: Unable to find current week');
+        return;
+    }
+    const row = week.querySelector('.days');
+    const walker = week.querySelector('.walker');
+    const trackCompleted = week.querySelector('.track-completed');
+    const trackCurrent = week.querySelector('.track-current');
+
+    if(!row || !walker){
+        console.warn('renderAllTracks: Unable to find row / walker');
+        return;
+    }
+
+    document.querySelectorAll('.walker').forEach(w => {
+        w.style.display = 'none';
+    });
+
+    if(!ENABLE_WALKER) return;
+
+    const rowRect = row.getBoundingClientRect();
+    const weekRect = week.getBoundingClientRect();
+    const isReverse = row.classList.contains('reverse');
+    const mode = getCharacterMode();
+    const { size: walkerSize, src: walkingSrc } = getWalkerConfig();
+
+
+    if(isFinished && AFTER_MODE.enabled){
+        const sleep = week.querySelector('.sleep');
+        const sleepZone = week.querySelector('.zzz');
+
+        if(!sleep || !sleepZone){
+            return;
+        }
+
+        sleep.style.display = 'block';
+        walker.style.display = 'none';
+
+        if(AFTER_MODE.animate){
+            startAfterModeChar(sleep, sleepZone);
+        }else{
+            sleep.src = AFTER_MODE.sleep.src;
+            sleep.style.width = AFTER_MODE.sleep.width + 'px';
+            sleep.style.height = AFTER_MODE.sleep.height + 'px';
+        }
+        return;
+    }
+
+    trackCurrent.style.display = isFinished ? 'none' : 'block';
+
+    const targetBox =
+        week.querySelector('.day.today');
+
+    if(!targetBox){
+        console.warn('renderAllTracks: Unable to find targetBox');
+        return;
+    }
+
+    const boxRect = targetBox.getBoundingClientRect();
+    const boxCenterInRow = boxRect.left - rowRect.left + boxRect.width / 2;
+
+    walker.src = walkingSrc;
+    walker.style.display = 'block';
+    if(mode === 'resting' && HAMMOCK_GIF){
+        walker.style.display = 'none';
+    }
+    walker.style.width = walkerSize + 'px';
+    walker.style.height = walkerSize + 'px';
+    walker.style.transform = isReverse ? 'scaleX(-1)' : 'scaleX(1)';
+
+    const walkerLeftInWeek = boxRect.left - weekRect.left + boxRect.width/2 - walkerSize/2;
+    walker.style.left = walkerLeftInWeek + 'px';
+
+    setTrackCurrentSpan(
+        trackCompleted, trackCurrent,
+        boxCenterInRow - TRACK_CURRENT_HALF, TRACK_CURRENT_WIDTH,
+        rowRect.width, isReverse
+    );
+
+    if(mode === 'resting' && HAMMOCK_GIF){
+        const hammock = document.createElement('img');
+        hammock.src = HAMMOCK_GIF;
+        hammock.className = 'hammock';
+        const hammockWidth = 36;
+        const hammockLeft = boxRect.left - weekRect.left + boxRect.width / 2 - hammockWidth / 2;
+        hammock.style.left = hammockLeft + 'px';
+        hammock.style.transform = 'none';
+        week.appendChild(hammock);
+    }
+}
+
+// ==================== Character (After Mode) ====================
+
+let afterModeMode = 'walking';
+let afterModeAnimationFrame = null;
+let afterModePhaseTimer = null;
+
+function randomDuration(min, max){
+    return min + Math.random() * (max - min);
+}
+
+function startAfterModeChar(char, zone){
+    if(afterModeAnimationFrame){
+        cancelAnimationFrame(afterModeAnimationFrame);
+    }
+    if(afterModePhaseTimer){
+        clearTimeout(afterModePhaseTimer);
+    }
+
+    const maxX = zone.offsetWidth - char.offsetWidth;
+    let direction = -1;
+    let position = maxX / 2;
+    char.style.transform = 'scaleX(1)';
+    zone.appendChild(char);
+
+    function movementLoop(){
+        const maxX = zone.offsetWidth - char.offsetWidth;
+
+        if(afterModeMode === 'walking'){
+            position += direction * AFTER_MODE.walk.speed;
+
+            if(position >= maxX){
+                position = maxX;
+                direction = -1;
+                char.style.transform = 'scaleX(1)';
+            }
+            if(position <= 0){
+                position = 0;
+                direction = 1;
+                char.style.transform = 'scaleX(-1)';
+            }
+            char.style.left = position + 'px';
+        }
+        afterModeAnimationFrame = requestAnimationFrame(movementLoop);
+    }
+    movementLoop();
+
+    function enterWalking(){
+        afterModeMode = 'walking';
+        const walkSize = window.innerWidth < MOBILE_BREAKPOINT 
+            ? AFTER_MODE.walk.large : AFTER_MODE.walk.large;
+        char.src = walkSize.src;
+        char.style.width = walkSize.width + 'px';
+        char.style.height = walkSize.height + 'px';
+        char.style.top = 'var(--walker-top)';
+
+        const duration = randomDuration(AFTER_MODE.walk.minSc, AFTER_MODE.walk.maxSc);
+        afterModePhaseTimer = setTimeout(enterSleeping, duration);
+    }
+
+    function enterSleeping(){
+        afterModeMode = 'sleeping';
+        char.src = AFTER_MODE.sleep.src;
+        char.style.width = AFTER_MODE.sleep.width + 'px';
+        char.style.height = AFTER_MODE.sleep.height + 'px';
+        char.style.top = 'var(--sleep-top)';
+
+        const duration = randomDuration(AFTER_MODE.sleep.minSc, AFTER_MODE.sleep.maxSc);
+        afterModePhaseTimer = setTimeout(enterWalking, duration);
+    }
+    enterWalking();
+}
+
+// ==================== Zoom ====================
+
+const zoomOverlay = document.getElementById('zoomOverlay');
+const zoomContent = document.getElementById('zoomContent');
+
+function zoomChar(character){
+    zoomContent.innerHTML = '';
+
+    const week = character.closest('.week');
+    const track = week?.querySelector('.track');
+    const charRect = character.getBoundingClientRect();
+    const largestSide = Math.min(window.innerWidth * 0.6, window.innerHeight * 0.6, 500);
+    const charSide = Math.max(charRect.width, charRect.height);
+    const scale = largestSide / charSide;
+    const scene = document.createElement('div');
+    scene.className = 'zoom-scene';
+    scene.style.width = `${largestSide}px`;
+    scene.style.height = `${largestSide}px`;
+    zoomContent.appendChild(scene);
+
+    const charClone = document.createElement('img');
+    charClone.src = character.src;
+    charClone.classList.add('zoom-character');
+
+    const charWidth = charRect.width * scale;
+    const charHeight = charRect.height * scale;
+    const charLeft = (largestSide - charWidth) / 2;
+    const charTop = (largestSide - charHeight) / 2;
+
+    charClone.style.width = `${charWidth}px`;
+    charClone.style.height = `${charHeight}px`;
+    charClone.style.left = `${charLeft}px`;
+    charClone.style.top = `${charTop}px`;
+
+    if(track){
+        const trackRect = track.getBoundingClientRect();
+        const trackClone = track.cloneNode(true);
+        trackClone.classList.add('zoom-track');
+        trackClone.style.left = `${charLeft + (trackRect.left - charRect.left) * scale}px`;
+        trackClone.style.top = `${charTop + charHeight - trackRect.height * scale}px`;
+        trackClone.style.width = `${trackRect.width}px`;
+        trackClone.style.height = `${trackRect.height}px`;
+        trackClone.style.transform = `scale(${scale})`;
+        scene.appendChild(trackClone);
+    }
+    scene.appendChild(charClone);
+
+    zoomOverlay.classList.add('show');
+}
+
+// ==================== Event ====================
+
+zoomOverlay.addEventListener('click', () => {
+    zoomOverlay.classList.remove('show');
+});
+
+requestAnimationFrame(renderAllTracks);
+
+let resizeTimer;
+function handleResize(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        applyWalkerSize();
+        renderAllTracks();
+    }, 150);
+    if(zoomOverlay.classList.contains('show')){
+        zoomOverlay.classList.remove('show');
+    }
+}
+
+window.addEventListener('resize', handleResize);
+
+function debugTime(date){
+    return{
+        display: date,
+        y: date.getUTCFullYear(),
+        m: date.getUTCMonth() + 1,
+        d: date.getUTCDate(),
+        h: date.getUTCHours(),
+        min: date.getUTCMinutes()
+    };
+}
+console.log(debugTime(nowTaipei)); //檢查時間有冇走位
+
+</script>
+ 
+</body>
+</html>
