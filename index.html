@@ -18,16 +18,17 @@ href='https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'>
     --week-gap: 60px;
     --days-offset: -3px;
     --track-offset: -20px;
-    --track-height: 18px;    
+    --track-height: 18px;
+    --walker-size: 48px;
     --walker-top: calc(-4px - var(--walker-size));
 
-    --hammock-width: 36px;
-    --hammock-height: 72px;
-    --hammock-top: -60px;
+    --hammock-width: 48px;
+    --hammock-height: 48px;
+    --hammock-top: calc(-4px - var(--walker-size));
 
-    --sleep-width: 36px;
-    --sleep-height: 72px;
-    --sleep-top: -60px;
+    --sleep-width: 48px;
+    --sleep-height: 48px;
+    --sleep-top: calc(-4px - var(--walker-size));
 
     --marker-top: -50px;
 
@@ -378,24 +379,23 @@ body {
 
 // ==================== Config ====================
 
-const START_DATE = '2026-06-29';
-const END_DATE = '2026-09-06';
-const LAST_WORKDAY = '2026-09-04';
+const START_DATE = '2026-10-19';
+const END_DATE = '2026-11-01';
+const LAST_WORKDAY = '2026-10-29';
 
 const WEEK_COLORS = ['#ffbfd9','#ffe79a','#bff0b7','#bfeeff','#d8bdff'];
 
 const ENABLE_WALKER = true;
-const WALK_GIF_SMALL = 'walk_36px.gif';
-const WALK_GIF_LARGE = 'walk_48px.gif';
+const WALK_GIF = 'toast_walk_48px.gif';
 
 const TRACK_IMAGE = '';
-const HAMMOCK_GIF = 'hammock.gif';
-const SLEEP_GIF = 'hammock.gif';
+const HAMMOCK_GIF = 'toast_sleep_48px.gif';
+const SLEEP_GIF = 'toast_sleep_48px.gif';
+const DANCE_GIF = '吐司舞_1440px.gif'; 
 const STAIR_IMAGE = 'stair.png';
 
 const TRACK_CURRENT_WIDTH = 72;
 const TRACK_CURRENT_HALF = TRACK_CURRENT_WIDTH / 2;
-const MOBILE_BREAKPOINT = 480;
 
 const AFTER_MODE = {
     enabled: true,
@@ -404,27 +404,27 @@ const AFTER_MODE = {
     trackFull: true,
     animate: true,
     walk: {
-        small: {
-            src: WALK_GIF_SMALL,
-            width: 36,
-            height: 36
-        },
-        large: {
-            src: WALK_GIF_LARGE,
-            width: 48,
-            height: 48
-        },
+        src: WALK_GIF,
+        width: 48,
+        height: 48,
         minSc: 1000,
         maxSc: 8000,
         speed: 0.2
     },
     sleep: {
         src: SLEEP_GIF,
-        width: 36,
-        height: 72,
+        width: 48,
+        height: 48,
         minSc: 3000,
         maxSc: 5000,
     },
+    dance: {
+        src: DANCE_GIF,
+        width: 48,
+        height: 48,
+        minSc: 1200,
+        maxSc: 3600,
+    }
 };
 
 
@@ -752,25 +752,8 @@ function getCharacterMode(){
 }
 
 function getWalkerConfig(){
-    return window.innerWidth < MOBILE_BREAKPOINT
-        ? { size: 48, src: WALK_GIF_LARGE }
-        : { size: 48, src: WALK_GIF_LARGE };
+    return { size: 48, src: WALK_GIF };
 }
-
-function applyWalkerSize(){
-    const { size, src } = getWalkerConfig();
-    document.documentElement.style.setProperty('--walker-size', `${size}px`);
-
-    document.querySelectorAll('.walker').forEach(walker => {
-        walker.width = size;
-        walker.height = size;
-        if(walker.getAttribute('src') !== src){
-            walker.src = src;
-        }
-    });
-}
-
-applyWalkerSize();
 
 // ==================== Render ====================
 
@@ -927,7 +910,7 @@ function startAfterModeChar(char, zone){
     }
 
     const maxX = zone.offsetWidth - char.offsetWidth;
-    let direction = -1;
+    let direction = 1;
     let position = maxX / 2;
     char.style.transform = 'scaleX(1)';
     zone.appendChild(char);
@@ -941,12 +924,12 @@ function startAfterModeChar(char, zone){
             if(position >= maxX){
                 position = maxX;
                 direction = -1;
-                char.style.transform = 'scaleX(1)';
+                char.style.transform = 'scaleX(-1)';
             }
             if(position <= 0){
                 position = 0;
                 direction = 1;
-                char.style.transform = 'scaleX(-1)';
+                char.style.transform = 'scaleX(1)';
             }
             char.style.left = position + 'px';
         }
@@ -956,15 +939,17 @@ function startAfterModeChar(char, zone){
 
     function enterWalking(){
         afterModeMode = 'walking';
-        const walkSize = window.innerWidth < MOBILE_BREAKPOINT 
-            ? AFTER_MODE.walk.large : AFTER_MODE.walk.large;
+        const walkSize = AFTER_MODE.walk;
         char.src = walkSize.src;
         char.style.width = walkSize.width + 'px';
         char.style.height = walkSize.height + 'px';
         char.style.top = 'var(--walker-top)';
 
         const duration = randomDuration(AFTER_MODE.walk.minSc, AFTER_MODE.walk.maxSc);
-        afterModePhaseTimer = setTimeout(enterSleeping, duration);
+        afterModePhaseTimer = setTimeout(() => {
+            Math.random() < 0.5 ? enterSleeping() : enterDancing();
+        }, 1000);
+        //afterModePhaseTimer = setTimeout(enterSleeping, duration);
     }
 
     function enterSleeping(){
@@ -972,9 +957,20 @@ function startAfterModeChar(char, zone){
         char.src = AFTER_MODE.sleep.src;
         char.style.width = AFTER_MODE.sleep.width + 'px';
         char.style.height = AFTER_MODE.sleep.height + 'px';
-        char.style.top = 'var(--sleep-top)';
+        char.style.top = 'var(--walker-top)';
 
         const duration = randomDuration(AFTER_MODE.sleep.minSc, AFTER_MODE.sleep.maxSc);
+        afterModePhaseTimer = setTimeout(enterWalking, duration);
+    }
+
+    function enterDancing(){
+        afterModeMode = 'dancing';
+        char.src = AFTER_MODE.dance.src;
+        char.style.width = AFTER_MODE.dance.width + 'px';
+        char.style.height = AFTER_MODE.dance.height + 'px';
+        char.style.top = 'var(--walker-top)';
+
+        const duration = randomDuration(AFTER_MODE.dance.minSc, AFTER_MODE.dance.maxSc);
         afterModePhaseTimer = setTimeout(enterWalking, duration);
     }
     enterWalking();
@@ -1042,7 +1038,6 @@ let resizeTimer;
 function handleResize(){
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-        applyWalkerSize();
         renderAllTracks();
     }, 150);
     if(zoomOverlay.classList.contains('show')){
