@@ -379,9 +379,9 @@ body {
 
 // ==================== Config ====================
 
-const START_DATE = '2026-10-19';
-const END_DATE = '2026-11-01';
-const LAST_WORKDAY = '2026-10-29';
+const START_DATE = '2026-10-26';
+const END_DATE = '2026-11-08';
+const LAST_WORKDAY = '2026-11-06';
 
 const WEEK_COLORS = ['#ffbfd9','#ffe79a','#bff0b7','#bfeeff','#d8bdff'];
 
@@ -476,7 +476,13 @@ let currentDate = new Date(startDate);
 const weeks = [];
 let currentWeek = [];
 
-const nowTaipei = new Date(Date.now() + TAIPEI_OFFSET_MS);
+const TEST_DATE = '2026-11-07';
+const nowTaipei = TEST_DATE
+    ? parseTaipeiDate(TEST_DATE)
+    : new Date(Date.now() + TAIPEI_OFFSET_MS);
+
+
+//const nowTaipei = new Date(Date.now() + TAIPEI_OFFSET_MS);
 const actualToday = new Date(Date.UTC(
     nowTaipei.getUTCFullYear(),
     nowTaipei.getUTCMonth(),
@@ -850,8 +856,14 @@ function renderAllTracks(){
 
     trackCurrent.style.display = isFinished ? 'none' : 'block';
 
-    const targetBox =
-        week.querySelector('.day.today');
+    /*const targetBox =
+        week.querySelector('.day.today');*/
+
+    const targetBox = 
+        week.querySelector('.day.today') ||
+        (afterDates.includes(todayStr)
+            ?week.querySelector('.zzz')
+            : null);
 
     if(!targetBox){
         console.warn('renderAllTracks: Unable to find targetBox');
