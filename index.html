@@ -24,11 +24,11 @@ href='https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'>
 
     --hammock-width: 48px;
     --hammock-height: 48px;
-    --hammock-top: calc(-4px - var(--walker-size));
+    --hammock-top: calc(-4px - var(--hammock-height));
 
     --sleep-width: 48px;
     --sleep-height: 48px;
-    --sleep-top: calc(-4px - var(--walker-size));
+    --sleep-top: calc(-4px - var(--sleep-height));
 
     --marker-top: -50px;
 
@@ -322,7 +322,7 @@ body {
 }
 
 .hammock {
-    z-i ndex: 30;
+    z-index: 30;
     image-rendering: pixelated;
     position: absolute;
     width: var(--hammock-width);
@@ -380,8 +380,8 @@ body {
 // ==================== Config ====================
 
 const START_DATE = '2026-10-26';
-const END_DATE = '2026-11-08';
-const LAST_WORKDAY = '2026-11-06';
+const END_DATE = '2026-11-15';
+const LAST_WORKDAY = '2026-11-08';
 
 const WEEK_COLORS = ['#ffbfd9','#ffe79a','#bff0b7','#bfeeff','#d8bdff'];
 
@@ -400,7 +400,16 @@ const TRACK_CURRENT_HALF = TRACK_CURRENT_WIDTH / 2;
 const AFTER_MODE = {
     enabled: true,
     text: '躺躺..zZ',
-    mergeDays: 2,
+    mergeDays: 7,
+    mergeWidths: {
+        1: 'calc(clamp(36px,10vw,50px) * 1.1)',
+        2: 'calc(clamp(36px,10vw,50px) * 2.2)',
+        3: 'calc(clamp(36px,10vw,50px) * 3.4 + 20px)',
+        4: 'calc(clamp(36px,10vw,50px) * 4.6 + 20px)',
+        5: 'calc(clamp(36px,10vw,50px) * 5.8 + 20px)',
+        6: 'calc(clamp(36px,10vw,50px) * 7.0 + 20px)',
+        7: 'calc(clamp(36px,10vw,50px) * 8.2 + 20px)'
+    },
     trackFull: true,
     animate: true,
     walk: {
@@ -408,8 +417,8 @@ const AFTER_MODE = {
         width: 48,
         height: 48,
         minSc: 1000,
-        maxSc: 8000,
-        speed: 0.2
+        maxSc: 3000,
+        speed: 0.2,
     },
     sleep: {
         src: SLEEP_GIF,
@@ -455,10 +464,7 @@ function getRemainingWorkdays(startDate, endDate){
     const end = new Date(endDate.getTime());
 
     while(checkDate <= end){
-        const day = checkDate.getUTCDay();
-        if(day >= 1 && day <= 5){
-            count++;
-        }
+        count++;
         checkDate.setUTCDate(checkDate.getUTCDate()+1);
     }
 
@@ -476,13 +482,11 @@ let currentDate = new Date(startDate);
 const weeks = [];
 let currentWeek = [];
 
-const TEST_DATE = '2026-11-07';
+const TEST_DATE = '';
 const nowTaipei = TEST_DATE
     ? parseTaipeiDate(TEST_DATE)
     : new Date(Date.now() + TAIPEI_OFFSET_MS);
 
-
-//const nowTaipei = new Date(Date.now() + TAIPEI_OFFSET_MS);
 const actualToday = new Date(Date.UTC(
     nowTaipei.getUTCFullYear(),
     nowTaipei.getUTCMonth(),
@@ -508,12 +512,6 @@ const remainingWorkdays = isFinished
 
 // ==================== Calendar (Setup) ====================
 
-for(let i = 0; i < AFTER_MODE.mergeDays; i++){
-    const d = new Date(endDate);
-    d.setUTCDate(d.getUTCDate()-i);
-    afterDates.unshift(formatDate(d));
-}
-
 while(currentDate <= endDate){
     dates.push(new Date(currentDate));
     currentDate.setUTCDate(currentDate.getUTCDate()+1);
@@ -532,13 +530,21 @@ if(currentWeek.length){
     weeks.push(currentWeek);
 }
 
+if(AFTER_MODE.enabled){
+    for(let i = 0; i < AFTER_MODE.mergeDays; i++){
+        const d = new Date(endDate);
+        d.setUTCDate(d.getUTCDate()-i);
+        afterDates.unshift(formatDate(d));
+    }
+}
+
 document.getElementById('dayNumber').textContent = remainingWorkdays;
 
 // ==================== Calendar (Countdown Box Sub) ====================
 
 const countdownSub = document.getElementById('countdownSub');
 
-if(remainingWorkdays <= 0){
+if(isFinished){
     countdownSub.innerHTML = `（已經自由嚕～～<img class='pleading' src='pleading-face.webp'><img class = 'sparkles' src='sparkles.png'>）`;
 }else{
     countdownSub.innerHTML = `（還有 ${remainingWorkdays} 天！<img class='pleading' src='pleading-face.webp'>）`;
@@ -627,6 +633,10 @@ weeks.forEach((week, weekIndex) => {
             sleepZone.textContent = AFTER_MODE.text;
             sleepZone.style.background = weekColor;
             sleepZone.dataset.date = dateStr;
+            
+            const mergedDays = afterDates.length;
+            sleepZone.style.width =
+                AFTER_MODE.mergeWidths[mergedDays];
 
             if(afterDates.includes(todayStr)){
                 currentWeekIndex = weekIndex;
@@ -648,8 +658,11 @@ weeks.forEach((week, weekIndex) => {
                 <div class='arrow'>▼</div>
             `;
 
-            const markerMonth = taipei.getUTCMonth();
-            const currentMonth = today.getUTCMonth();
+            const markerMonth =
+                taipei.getUTCFullYear() * 12 + taipei.getUTCMonth();
+            
+            const currentMonth =
+                today.getUTCFullYear() * 12 + today.getUTCMonth();
             
             if(markerMonth < currentMonth){
                 marker.classList.add('past-month');
@@ -661,10 +674,6 @@ weeks.forEach((week, weekIndex) => {
         if(dateStr < todayStr){
             day.classList.add('past');
         }
-
-        day.dataset.weekIndex = weekIndex;
-        day.dataset.dayIndex = index;
-        day.dataset.date = dateStr;
 
         if(dateStr === todayStr){
             day.classList.add('today');
@@ -745,15 +754,8 @@ function setTrackCurrentSpan(trackCompleted, trackCurrent, anchorLeft, width, ro
 // ==================== Character ====================
 
 function getCharacterMode(){
-    const day = nowTaipei.getUTCDay();
     const hour = nowTaipei.getUTCHours();
-
-    const isRestWindow =
-        (day === 5 && hour >= 18) ||
-        day === 6 ||
-        day === 0 ||
-        (day === 1 && hour < 8);
-
+    const isRestWindow = hour >= 16 || hour < 8;
     return isRestWindow ? 'resting' : 'walking';
 }
 
@@ -765,6 +767,11 @@ function getWalkerConfig(){
 
 function renderAllTracks(){
     const allWeeks = document.querySelectorAll('.week');
+    
+    if(currentWeekIndex < 0){
+        currentWeekIndex = weeks.length - 1; // if cant find today week then show last week
+    }
+    
     const isFinished = actualToday > lastWorkdayDate;
 
     allWeeks.forEach((weekEl, index) => {
@@ -800,10 +807,6 @@ function renderAllTracks(){
         }
     });
     document.querySelectorAll('.hammock').forEach(el => el.remove());
-
-    if(currentWeekIndex < 0){
-        currentWeekIndex = weeks.length - 1; // if cant find today week then show last week
-    }
 
     const week = allWeeks[currentWeekIndex];
     if(!week){
@@ -862,7 +865,7 @@ function renderAllTracks(){
     const targetBox = 
         week.querySelector('.day.today') ||
         (afterDates.includes(todayStr)
-            ?week.querySelector('.zzz')
+            ? week.querySelector('.zzz')
             : null);
 
     if(!targetBox){
@@ -895,7 +898,7 @@ function renderAllTracks(){
         const hammock = document.createElement('img');
         hammock.src = HAMMOCK_GIF;
         hammock.className = 'hammock';
-        const hammockWidth = 36;
+        const hammockWidth = 48;
         const hammockLeft = boxRect.left - weekRect.left + boxRect.width / 2 - hammockWidth / 2;
         hammock.style.left = hammockLeft + 'px';
         hammock.style.transform = 'none';
@@ -960,8 +963,7 @@ function startAfterModeChar(char, zone){
         const duration = randomDuration(AFTER_MODE.walk.minSc, AFTER_MODE.walk.maxSc);
         afterModePhaseTimer = setTimeout(() => {
             Math.random() < 0.5 ? enterSleeping() : enterDancing();
-        }, 1000);
-        //afterModePhaseTimer = setTimeout(enterSleeping, duration);
+        }, duration);
     }
 
     function enterSleeping(){
@@ -969,7 +971,7 @@ function startAfterModeChar(char, zone){
         char.src = AFTER_MODE.sleep.src;
         char.style.width = AFTER_MODE.sleep.width + 'px';
         char.style.height = AFTER_MODE.sleep.height + 'px';
-        char.style.top = 'var(--walker-top)';
+        char.style.top = 'var(--sleep-top)';
 
         const duration = randomDuration(AFTER_MODE.sleep.minSc, AFTER_MODE.sleep.maxSc);
         afterModePhaseTimer = setTimeout(enterWalking, duration);
@@ -980,7 +982,7 @@ function startAfterModeChar(char, zone){
         char.src = AFTER_MODE.dance.src;
         char.style.width = AFTER_MODE.dance.width + 'px';
         char.style.height = AFTER_MODE.dance.height + 'px';
-        char.style.top = 'var(--walker-top)';
+        char.style.top = 'var(--sleep-top)';
 
         const duration = randomDuration(AFTER_MODE.dance.minSc, AFTER_MODE.dance.maxSc);
         afterModePhaseTimer = setTimeout(enterWalking, duration);
