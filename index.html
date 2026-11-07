@@ -898,6 +898,9 @@ function renderAllTracks(){
         const hammock = document.createElement('img');
         hammock.src = HAMMOCK_GIF;
         hammock.className = 'hammock';
+        hammock.addEventListener('click', () => {
+            zoomChar(hammock);
+        });
         const hammockWidth = 48;
         const hammockLeft = boxRect.left - weekRect.left + boxRect.width / 2 - hammockWidth / 2;
         hammock.style.left = hammockLeft + 'px';
@@ -1023,6 +1026,7 @@ function zoomChar(character){
     charClone.style.height = `${charHeight}px`;
     charClone.style.left = `${charLeft}px`;
     charClone.style.top = `${charTop}px`;
+    charClone.style.transform = character.style.transform || 'none';
 
     if(track){
         const trackRect = track.getBoundingClientRect();
